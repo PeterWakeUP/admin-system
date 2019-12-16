@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.evsoft.modules.sys.dao.SysUserDao">
+    <select id="queryObject" resultType="com.evsoft.modules.sys.entity.SysUserEntity">
+		select u.*, (select d.name from sys_dept d where d.dept_id = u.dept_id) deptName from sys_user u where u.user_id = #{value}
+	</select>
+
+    <select id="queryList" resultType="com.evsoft.modules.sys.entity.SysUserEntity">
+        select
+        <choose>
+            <when test="simple != null and 'y'.toString() == simple">
+                u.user_id, u.username, u.nickname
+            </when>
+            <otherwise>
+                u.*, (select d.name from sys_dept d where d.dept_id = u.dept_id) deptName
+            </otherwise>
+        </choose>
+
+        from sys_user u
+        <where>
+            <if test="username != null and username.trim() != ''">
+                (u.`username` like concat('%',#{username},'%')
+                or u.`nickname` like concat('%',#{username},'%'))
+            </if>
+            <if test="userIds != null">
+                and u.`user_id` in
+                <foreach collection="userIds" item="userId" open="(" separator="," close=")">#{userId}</foreach>
+            </if>
+            <if test="deptId != null">
+                and dept_id in
+                <foreach item="deptIdItem" collection="deptId" open="(" separator="," close=")">
+                    #{deptIdItem}
+                </foreach>
+            </if>
+
+            <if test="uid != null and uid != ''">
+                and user_id =#{uid}
+            </if>
+            <if test="sysUserId ==null or sysUserId== ''">
+                and user_id !=1
+            </if>
+        </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by u.${sidx} ${order}
+            </when>
+            <otherwise>
+                order by u.user_id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal"  resultType="int">
+        select count(*) from sys_user
+        <where>
+            <if test="username != null and username.trim() != ''">
+                (username like concat('%',#{username},'%')
+                or  nickname like concat('%',#{username},'%'))
+            </if>
+            <if test="deptId != null">
+                and dept_id in
+                <foreach item="deptIdItem" collection="deptId" open="(" separator="," close=")">
+                    #{deptIdItem}
+                </foreach>
+            </if>
+
+            <if test="uid != null and uid != ''">
+                and user_id =#{uid}
+            </if>
+            <if test="sysUserId ==null or sysUserId== ''">
+                and user_id !=1
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询用户的所有权限 -->
+    <select id="queryAllPerms" resultType="string">
+		select m.perms from sys_user_role ur 
+			LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id 
+			LEFT JOIN sys_menu m on rm.menu_id = m.menu_id 
+		where ur.user_id = #{userId}
+	</select>
+
+    <!--根据部门ID查询用户数据-->
+    <select id="getUserByDeptIdList" parameterType="long" resultMap="getUserByDeptIdMap">
+        SELECT user_id,nickname,operator_num  FROM sys_user WHERE  STATUS=1 AND dept_id=#{deptId}
+    </select>
+
+    <!--根据系统用户类型查询用户数据-->
+    <select id="getUserByOperUserTypeList" resultType="com.evsoft.modules.sys.entity.SysUserEntity">
+        SELECT operator_num,nickname FROM sys_user WHERE  operator_value=#{operatorValue}
+    </select>
+
+    <!--查询会员等级数据-->
+    <select id="getUserLevelList" resultMap="getUserByDeptIdMap">
+        SELECT u.user_id,u.nickname,u.`level`,d.name as deptName,selectTag FROM sys_user u
+        LEFT join sys_dept d on u.dept_id=d.dept_id
+        <where>
+            <if test="deptIds != null and deptIds.length>0">
+                AND u.dept_id in
+                <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">#{deptId}
+                </foreach>
+            </if>
+            <if test="userId!=null and userId!=''">
+                and u.user_id=#{userId}
+            </if>
+            <if test="level!=null and level!=''">
+                and u.level=#{level}
+            </if>
+            AND STATUS=1
+        </where>
+    </select>
+
+    <resultMap id="getUserByDeptIdMap" type="com.evsoft.modules.sys.entity.SysUserEntity">
+        <id property="userId" column="user_id"/>
+        <id property="nickname" column="nickname"/>
+        <id property="username" column="username"/>
+        <id property="jobNum" column="job_num"/>
+        <id property="operatorNum" column="operator_num"/>
+    </resultMap>
+
+    <!-- 查询用户的所有菜单ID -->
+    <select id="queryAllMenuId" resultType="long">
+		select distinct rm.menu_id from sys_user_role ur 
+			LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id 
+		where ur.user_id = #{userId}
+	</select>
+
+    <!-- 查询用户的所有菜单ID xrl-->
+    <select id="getAllUserByDeptId" resultMap="getUserByDeptIdMap">
+        select user_id,nickname from sys_user where dept_id in
+        <foreach item="deptId" collection="array" open="(" separator="," close=")">
+            #{deptId}
+        </foreach>
+    </select>
+
+    <select id="queryByNickName" resultType="com.evsoft.modules.sys.entity.SysUserEntity">
+		select * from sys_user where nickname = #{nickName}
+	</select>
+
+    <select id="queryByUserName" resultType="com.evsoft.modules.sys.entity.SysUserEntity">
+		select * from sys_user where username = #{username}
+	</select>
+
+    <insert id="save" parameterType="com.evsoft.modules.sys.entity.SysUserEntity" useGeneratedKeys="true"
+            keyProperty="userId">
+		insert into sys_user
+		(
+			`user_id`, 
+			`username`,
+			`nickname`,
+			`password`,
+			`salt`,
+        <if test="email != null">
+			`email`,
+        </if>
+        <if test="mobile != null">
+			`mobile`,
+        </if>
+			`status`,
+			`dept_id`,
+			`job_num`,
+			`create_time`
+		)
+		values
+		(
+			#{userId}, 
+			#{username},
+			#{nickname},
+			#{password},
+			#{salt},
+        <if test="email != null">
+			#{email},
+        </if>
+        <if test="mobile != null">
+			#{mobile},
+        </if>
+			#{status},
+			#{deptId},
+			#{jobNum},
+			#{createTime}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.evsoft.modules.sys.entity.SysUserEntity">
+        update sys_user
+        <set>
+            <if test="username != null">`username` = #{username},</if>
+            <if test="nickname != null">`nickname` = #{nickname},</if>
+            <if test="password != null">`password` = #{password},</if>
+            <if test="email != null">`email` = #{email},</if>
+            <if test="mobile != null">`mobile` = #{mobile},</if>
+            <if test="status != null">`status` = #{status},</if>
+            <if test="deptId != null">`dept_id` = #{deptId},</if>
+            <if test="jobNum != null">`job_num` = #{jobNum},</if>
+
+            <if test="tgKey != null">`tgKey` = #{tgKey},</if>
+            <if test="tgNum != null">`tgNum` = #{tgNum},</if>
+
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <update id="updatePassword" parameterType="map">
+		update sys_user set `password` = #{newPassword} 
+			where user_id = #{userId} and password = #{password}
+	</update>
+
+    <update id="resetUserPwd" parameterType="map">
+		update sys_user set `password` = #{newPassword}
+		where user_id = #{userId}
+	</update>
+
+    <delete id="deleteBatch">
+        delete from sys_user where user_id in
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        ;
+        delete from sys_user_role where user_id in
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+
+
+    <!--根据工号读取用户数据 -->
+    <select id="getUserByJobNo" parameterType="String" resultMap="getUserMap">
+        SELECT user_id,dept_id,username,nickname,job_num,email,mobile FROM sys_user WHERE STATUS=1 AND job_num=#{value}
+    </select>
+
+    <select id="getOneUser" resultMap="getUserMap">
+        SELECT user_id,dept_id,username,nickname,job_num,email,mobile
+        FROM sys_user
+        WHERE STATUS=1
+        AND user_id = #{userId}
+    </select>
+
+    <resultMap id="getUserMap" type="com.evsoft.modules.sys.dto.SysUserDto">
+        <id column="user_id" property="userID"/>
+        <id column="dept_id" property="deptID"/>
+        <id column="username" property="userName"/>
+        <id column="nickname" property="nickName"/>
+        <id column="job_num" property="jobNum"/>
+        <id column="email" property="email"/>
+        <id column="mobile" property="mobile"/>
+    </resultMap>
+
+    <!--批量更新用户数据-->
+    <update id="batchUpdateUser" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE sys_user SET
+            `level`=#{item.level},
+            `selectTag`=#{item.selectTag}
+            WHERE user_id=#{item.userId}
+        </foreach>
+    </update>
+
+
+    <!--批量解绑二次验证-->
+    <update id="batchUpdateUntieUser">
+        update sys_user set tgNum=0  where user_id in
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </update>
+
+    <select id="getUserByDeptId" resultMap="getUserByDeptIdMap">
+        select *
+        from sys_user
+        where dept_id = #{deptId}
+    </select>
+
+    <!--通过用户id获取可以查看的部门-->
+    <select id="getDeptListByUserID" parameterType="Long" resultType="Long">
+       select  distinct dept_id from sys_role_dept where role_id in (select role_id from sys_user_role where user_id=#{user_id})
+    </select>
+
+    <!--记录登录时间，token到数据库-->
+    <insert id="saveLoginTime" parameterType="com.evsoft.modules.sys.entity.SysLoginlogEntity" useGeneratedKeys="true"
+            keyProperty="id">
+		insert into sys_loginlog
+		(
+			`id`,
+			`userId`,
+			`token`,
+			`createTime`,
+			`loginTime`
+		)
+		values
+		(
+			#{id},
+			#{userId},
+			#{token},
+			#{createTime},
+			#{loginTime}
+		)
+	</insert>
+
+    <!--update退出时间，在线登录时长-->
+    <update id="updateLoginlog" parameterType="com.evsoft.modules.sys.entity.SysLoginlogEntity">
+        update sys_loginlog
+        <set>
+            <if test="logoutTime != null">`logoutTime` = #{logoutTime},</if>
+            <if test="onlineTime != null">`onlineTime` = #{onlineTime},</if>
+        </set>
+        where token = #{token} and userId=#{userId}
+    </update>
+
+    <select id="queryLoginTimeByToken" resultType="com.evsoft.modules.sys.entity.SysLoginlogEntity">
+        select *
+        from sys_loginlog
+        where token = #{token} and userId=#{userId}
+    </select>
+
+    <select id="getAllUser" resultType="com.evsoft.modules.sys.dto.SysUserDto">
+        select * from sys_user
+    </select>
+    <select id="queryBatchId" resultType="com.evsoft.modules.sys.dto.SysUserDto">
+        SELECT * FROM sys_user where user_id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

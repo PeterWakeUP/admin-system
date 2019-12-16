@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>项目列表</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+    <link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/AdminLTE.min.css">
+
+    <script src="../../libs/jquery.min.js"></script>
+    <script src="../../plugins/layer/layer.js"></script>
+    <script src="../../libs/bootstrap.min.js"></script>
+    <script src="../../libs/vue.min.js"></script>
+    <script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+    <script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+    <script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+    <script src="../../js/common.js"></script>
+
+    <link href="../../js/report/Datepicker/css/foundation-datepicker.css" rel="stylesheet" type="text/css">
+
+    <style type="text/css">
+        [v-cloak] {
+            display: none
+        }
+        table {
+            border: 1px solid #ccc;
+            padding: 0;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 10px;
+            width: 100%;
+        }
+        table td,
+        table th {
+            height: 30px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-size: 15px;
+            padding: 3px 3px 3px 8px;
+        }
+        table th:first-child {
+            width: 30px;
+        }
+        .container,
+        .st {
+            width: 1000px;
+            margin: 10px auto 0;
+            font-size: 13px;
+            font-family: 'Microsoft YaHei'
+        }
+        .container .search {
+            font-size: 15px;
+            padding: 4px;
+        }
+        .container .add {
+            padding: 5px 15px;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 6;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .overlay td:first-child {
+            width: 66px;
+        }
+        .overlay .con {
+            position: absolute;
+            width: 420px;
+            min-height: 300px;
+            background: #fff;
+            left: 50%;
+            top: 50%;
+            -webkit-transform: translate3d(-50%, -50%, 0);
+            transform: translate3d(-50%, -50%, 0);
+            /*margin-top: -150px;*/
+            padding: 20px;
+        }
+
+
+
+        .layui-layer-my[type=dialog] {
+            min-width: 280px
+        }
+
+        .layui-layer-my .layui-layer-title {
+            background: #4476A7;
+            color: #fff;
+            border: none
+        }
+
+        .layui-layer-my .layui-layer-btn {
+            padding: 10px;
+            text-align: right;
+            border-top: 1px solid #E9E7E7
+        }
+
+        .layui-layer-my .layui-layer-btn a {
+            background: #4476A7;
+            border: none
+        }
+
+        .layui-layer-my .layui-layer-btn .layui-layer-btn1 {
+            background: #C9C5C5
+        }
+
+        #u2545_textarea1 {
+            position: absolute;
+            left: 100px;
+            top: 20px;
+            height: 30px;
+            width: 300px;
+        }
+
+        #u2545_textarea2 {
+            position: absolute;
+            left: 100px;
+            top: 80px;
+            height: 150px;
+            width: 370px;
+        }
+
+        #u2545_textarea3 {
+            position: absolute;
+            left: 100px;
+            top: 260px;
+            height: 30px;
+            width: 200px;
+        }
+
+        #u2545_textarea4 {
+            position: absolute;
+            left: 100px;
+            top: 320px;
+            height: 30px;
+            width: 200px;
+        }
+
+        #u2545_select1 {
+            position: absolute;
+            left: 100px;
+            top: 380px;
+        }
+
+        #u2545_select2 {
+            position: absolute;
+            left: 100px;
+            top: 440px;
+        }
+        input[type=date]::-webkit-inner-spin-button { visibility: hidden; }
+    </style>
+
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <a  class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            <a  class="btn btn btn-warning" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            <a  class="btn btn-danger" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            <a class="btn btn-success" @click="goBack"><i class="fa"></i>&nbsp;返回</a>
+
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+
+    </div>
+   <div v-show="!showList" class="panel panel-default">
+        <div class="col-md-12">
+            <div class="box box-default box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{title}}</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body" style="background-color:#EAEAEA;" id="recode_dt">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">字典值</div>
+                            <div class="col-sm-10">
+                                <input type="text" id="dicValue" class="form-control" v-model="dictionary.dicValue" placeholder="请输入字典值"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">字典名称</div>
+                            <div class="col-sm-10">
+                                <input type="text" id="dicName" class="form-control" v-model="dictionary.dicName" placeholder="请输入字典名称"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">备注</div>
+                            <div class="col-sm-10">
+                                <input type="text" id="remarks" class="form-control" v-model="dictionary.remarks" placeholder="备注"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">排序</div>
+                            <div class="col-sm-10">
+                                <input type="text" id="dicSort" class="form-control" v-model="dictionary.dicSort" placeholder="排序"
+                                       oninput = "value=value.replace(/[^\d]/g,'')"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label"></div>
+                            <input type="button" class="btn btn-primary" @click="saveOrUpdate(this)" value="保存"/>
+                            &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--时间插件-->
+<script src="../../js/report/Datepicker/js/foundation-datepicker.js"></script>
+<script src="../../js/report/Datepicker/js/locales/foundation-datepicker.zh-CN.js"></script>
+
+<script src="../../js/modules/sys/sysDictionaryDetail.js"></script>
+
+<script src="../../libs/fastclick.js"></script>
+<script src="../../libs/demo.js"></script>
+<script src="../../libs/adminlte.min.js"></script>
+<script src="../../libs/bootstrap-tooltip.js"></script>
+<script src="../../libs/bootstrap-popover.js"></script>
+
+</body>
+</html>

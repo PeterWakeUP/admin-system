@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.evsoft.modules.sys.dao.SysDictionaryDao">
+
+    <sql id="Base_Column_List">
+		id, dicKey, dicValue, dicName, remarks,  dic_sort, fixed,pid,flag,userId,createAt,updateAt
+	</sql>
+
+
+    <select id="queryList" resultType="com.evsoft.modules.sys.entity.SysDictionaryEntity" parameterType="map">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_dictionary
+        <where>
+            pid = #{pid} AND flag=0
+        </where>
+        order by dic_sort asc, createAt desc
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+
+    <select id="queryAllDictionary" resultType="com.evsoft.modules.sys.entity.SysDictionaryEntity">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_dictionary
+        <where>
+            <if test="dicName != null and dicName.trim() != ''">
+                and dicName like concat('%',#{dicName},'%')
+            </if>
+            and pid =0 AND flag=0
+        </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by p.${sidx} ${order}
+            </when>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select count(*) from sys_dictionary
+        <where>
+            <if test="dicKey != null and dicKey.trim() != ''">
+                and `dicKey` like concat('%',#{dicKey},'%')
+            </if>
+            and pid = 0 AND flag=0
+        </where>
+    </select>
+
+    <select id="queryTotalByPid" resultType="int">
+        select COUNT(*) from sys_dictionary
+        <where>
+            pid = #{pid} AND flag=0
+        </where>
+    </select>
+
+    <insert id="saveDictionary">
+		INSERT INTO sys_dictionary (dicKey,dicName,remarks,flag,pid,userId,createAt,updateAt)
+		VALUES (#{dicKey},#{dicName},#{remarks}, #{flag} , #{pid}, #{userId},now(),now())
+	</insert>
+
+    <update id="deleteDictionary">
+        update sys_dictionary set flag = -1,updateAt=now() where id in
+        <foreach item="dictionaryId" collection="array" open="(" separator="," close=")">
+            #{dictionaryId}
+        </foreach>
+    </update>
+
+    <update id="updateDictionary">
+		update sys_dictionary set dicName = #{dicName},dicKey = #{dicKey},remarks = #{remarks},updateAt=now() where id = #{id}
+	</update>
+
+
+    <insert id="saveDictionaryDetail">
+		INSERT INTO sys_dictionary (dicValue,dicName,remarks,dic_sort, flag,pid,userId,createAt,updateAt)
+		VALUES (#{dicValue},#{dicName},#{remarks}, #{dicSort}, #{flag} , #{pid}, #{userId},now(),now())
+	</insert>
+
+    <update id="updateDictionaryDetail">
+		update sys_dictionary set dicName = #{dicName},dicValue = #{dicValue},remarks = #{remarks},updateAt=now(), dic_sort = #{dicSort} where id = #{id}
+	</update>
+
+
+    <select id="getCount" resultType="int">
+        select COUNT(*) from sys_dictionary
+        <where>
+            <if test="dicValue !=null and dicValue != ''">
+                AND dicValue=#{dicValue}
+            </if>
+            <if test="pid !=null and pid != ''">
+                AND pid=#{pid}
+            </if>
+            <if test="dicKey !=null and dicKey != ''">
+                AND dicKey=#{dicKey}
+            </if>
+        </where>
+    </select>
+
+    <select id="getValueByKey" resultType="com.evsoft.modules.sys.entity.SysDictionaryEntity">
+        select
+        <include refid="Base_Column_List"/>
+        FROM sys_dictionary
+        where pid=(SELECT id from sys_dictionary where dicKey=#{dicKey}) and flag = 0
+    </select>
+    <!--根据键值获取字段属性值和文本-->
+    <select id="getDictNameValueByKey" resultType="com.evsoft.modules.sys.entity.SysDictionaryEntity">
+		select dicValue, dicName
+		FROM sys_dictionary
+		where flag=0 AND pid=(SELECT id from sys_dictionary where dicKey=#{dictKey}) ORDER BY id ASC
+	</select>
+
+
+    <select id="getMaxDicValue" resultType="int">
+        select MAX(dicValue+0) from sys_dictionary where pid=(SELECT id from sys_dictionary where dicKey=#{dicKey})
+    </select>
+
+
+    <select id="getPid" resultType="int">
+        select id from sys_dictionary where dicKey = #{dicKey}
+    </select>
+</mapper>

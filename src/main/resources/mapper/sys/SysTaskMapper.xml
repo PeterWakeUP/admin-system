@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.evsoft.modules.sys.dao.SysTaskDao">
+
+    <select id="queryList"  resultType="com.evsoft.modules.sys.entity.SystTaskEntity">
+      SELECT  id,taskKey,mc,rule,status,bewrite,pro,createUsre,createAt,updateUser,updateAt  FROM sys_task
+        <where>
+            and del = 1
+            <if test="id != null and id.trim() != ''">
+                and id = #{id}
+            </if>
+            <if test="status != null and status.trim() != ''">
+                and status = #{status}
+            </if>
+            <if test="mc != null and mc.trim() != ''">
+              and mc = #{mc}
+            </if>
+            <if test="taskKey != null and taskKey.trim() != ''">
+              and taskKey = #{taskKey}
+            </if>
+
+        </where>
+        ORDER BY createAt desc
+    </select>
+
+
+    <select id="queryTaskByOne"  resultType="com.evsoft.modules.sys.entity.SystTaskEntity">
+        SELECT  id,taskKey,mc,rule,status,bewrite,pro,createUsre,createAt,updateUser,updateAt  FROM sys_task
+        <where>
+            and del = 1
+            <if test="id != null and id.trim() != ''">
+                and id = #{id}
+            </if>
+            <if test="status != null and status.trim() != ''">
+                and status = #{status}
+            </if>
+            <if test="mc != null and mc.trim() != ''">
+                and mc = #{mc}
+            </if>
+            <if test="taskKey != null and taskKey.trim() != ''">
+                and taskKey = #{taskKey}
+            </if>
+
+        </where>
+        ORDER BY createAt desc limit 1;
+    </select>
+
+
+    <update id="updateTask">
+        update sys_task
+        <set>
+            <if test="status != null">`status` = #{status},</if>
+            <if test="mc != null">`mc` = #{mc},</if>
+            <if test="rule != null">`rule` = #{rule},</if>
+            <if test="rule != null">`bewrite` = #{bewrite},</if>
+            <if test="updateUser != null">`updateUser` = #{updateUser},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateDel">
+        update sys_task set del = 2 where id = #{id}
+    </update>
+
+
+
+    <insert id="saveTask" parameterType="com.evsoft.modules.sys.entity.SystTaskEntity" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into sys_task
+        (
+            `taskKey`,
+            `mc`,
+            `rule`,
+            `pro`,
+            `bewrite`,
+            `createUsre`,
+            `createAt`,
+            `updateUser`,
+            `updateAt`,
+            `del`
+        )
+        values
+        (
+            #{taskKey},
+            #{mc},
+            #{rule},
+            '',
+            #{bewrite},
+            #{createUsre},
+            now(),
+            #{updateUser},
+            now(),
+            1
+        )
+    </insert>
+</mapper>

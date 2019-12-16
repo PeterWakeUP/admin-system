@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.evsoft.modules.sys.dao.SysUserTokenDao">
+
+	<select id="queryByUserId" resultType="com.evsoft.modules.sys.entity.SysUserTokenEntity">
+		select * from sys_user_token where user_id = #{value}
+	</select>
+
+	<select id="queryByToken" resultType="com.evsoft.modules.sys.entity.SysUserTokenEntity">
+		select * from sys_user_token where token = #{value}
+	</select>
+
+	<select id="queryByTempToken" resultType="com.evsoft.modules.sys.entity.SysUserTokenEntity">
+		select * from sys_user_token where tempToken = #{value}
+	</select>
+	 
+	<insert id="save" parameterType="com.evsoft.modules.sys.entity.SysUserTokenEntity">
+		insert into sys_user_token
+		(
+			`user_id`, 
+			`token`,
+			`tempToken`,
+			`expire_time`, 
+			`tempExpireTime`,
+			`update_time`
+		)
+		values
+		(
+			#{userId}, 
+			#{token},
+			#{tempToken},
+			#{expireTime}, 
+			#{tempExpireTime},
+			#{updateTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.evsoft.modules.sys.entity.SysUserTokenEntity">
+		update sys_user_token
+		<set>
+			<if test="token != null">`token` = #{token}, </if>
+			<if test="tempToken != null">`tempToken` = #{tempToken}, </if>
+			<if test="expireTime != null">`expire_time` = #{expireTime}, </if>
+			<if test="tempExpireTime != null">`tempExpireTime` = #{tempExpireTime}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}</if>
+		</set>
+		where user_id = #{userId}
+	</update>
+
+</mapper>

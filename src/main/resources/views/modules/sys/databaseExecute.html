@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CRMSQL</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+    <link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="../../plugins/datepicker/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="../../plugins/datetimepicker/bootstrap-datetimepicker.min.css">
+    <script src="../../libs/jquery.min.js"></script>
+    <script src="../../plugins/layer/layer.js"></script>
+    <script src="../../libs/bootstrap.min.js"></script>
+    <script src="../../libs/vue.min.js"></script>
+    <script src="../../libs/validator.js"></script>
+    <script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+    <script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+    <script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+    <script src="../../plugins/tableexport/FileSaver.min.js"></script>
+    <script src="../../plugins/tableexport/xlsx.core.min.js"></script>
+    <script src="../../plugins/tableexport/tableExport.js"></script>
+    <script src="../../js/common.js"></script>
+
+
+
+    <script src="../../plugins/datepicker/bootstrap-datepicker.js"></script>
+    <script src="../../plugins/datepicker/bootstrap-datepicker.zh-CN.js"></script>
+    <script src="../../plugins/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="../../plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+
+    <style type="text/css" rel="stylesheet">
+        #rightmenu{
+            position:absolute;
+            width: 100px;
+            font-size: 12px;
+            display: none;
+            border:1px solid;
+            border-radius: 4px;
+            z-index: 100;
+        }
+        #rightmenu li{
+            cursor: pointer;
+            height: 30px;
+            line-height: 30px;
+            background-color: white;
+            padding-left: 5px;
+        }
+        #rightmenu li:hover{
+            background-color: silver;
+        }
+        #tempTable{
+            display:none;
+            /*position:absolute;*/
+            /*top: -1000px;*/
+            /*left:-1000px;*/
+        }
+        ul,li{
+            margin:0;
+            padding:0;
+            list-style: none;
+        }
+    </style>
+</head>
+<body>
+<div id="rrOauthClient" v-cloak>
+
+    <div v-show="titleShow">
+        <div id="buttonId" class="grid-btn" style="margin-bottom: 10px;">
+            <a class="btn btn-default" @click="query">执行</a>
+            <a class="btn btn-default" @click="bsql">格式化sql</a>
+            <a class="btn btn-default" @click="clear">清除</a>
+            <label>数据库:</label>
+            <select id="dbtype" style="height: 28px">
+                <option value="crm">CRM</option>
+                <option value="kefu">在线客服</option>
+                <option value="dataCenter">数据中心</option>
+            </select>
+
+        </div>
+        <div id="sqlviewId" style="margin-bottom: 10px;">
+            <textarea name="text" id="sql" class="form-control" rows="8"></textarea>
+
+        </div>
+
+        <div id="tempTable">
+        </div>
+
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+    <div id = 'rightmenu' tabindex = "-1">
+        <ul id='clicklist'>
+            <li class = "click-list">运行已选择</li>
+        </ul>
+    </div>
+
+
+    <div class="modal fade" id="modal_app_info">
+        <div class="modal-dialog">
+            <form class="form-horizontal">
+                <div class="modal-content" id="main_form" style="width: 1000px;">
+                </div>
+            </form>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+</div>
+<script src="../../js/modules/sys/databaseExecute.js"></script>
+</body>
+</html>
