@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 /**
  * 该配置类可以使spring自带定时任务多线程执行
  */
-//@Configuration
-//@EnableScheduling  //开启定时器
+@Configuration
+@EnableScheduling  //开启定时器
 public class SchedulerConfig implements SchedulingConfigurer {
 
     @Override
