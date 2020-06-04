@@ -10,7 +10,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
- * 该配置类可以使spring自带定时任务多线程执行
+ * 该配置类可以使spring自带定时任务多线程并发执行
+ * 不开启多线程，则单线程执行，即一个定时任务执行完了，下一个才会执行。所有的定时任务都是在同一个线程池用同一个线程来处理
+ *
  */
 @Configuration
 @EnableScheduling  //开启定时器
