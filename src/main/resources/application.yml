@@ -32,6 +32,7 @@ props:
 feiji:
   name: "plane"
   length: 100
+  weight: 100
 
 
 
