@@ -34,5 +34,8 @@ feiji:
   length: 100
   weight: 100
 
+tanke:
+  name: "tank"
+
 
 
