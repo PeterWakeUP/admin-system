@@ -29,6 +29,9 @@ mybatis:
 props:
   sql.show: true
 
+feiji:
+  name: "plane"
+  length: 100
 
 
 
