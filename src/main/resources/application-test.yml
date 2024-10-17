@@ -1,7 +1,7 @@
 spring:
   datasource:
-    username: root
-    password: admin
+    username: ENC(hkRvXsWyyGYR1u5kkZ0p9w==)
+    password: ENC(0E6K6t3wWDa6FiVWakpHLg==)
     url: jdbc:mysql://localhost:3306/admin_system?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.jdbc.Driver
     #连接池的配置信息
@@ -17,6 +17,14 @@ spring:
     testOnReturn: false
     poolPreparedStatements: true
     maxPoolPreparedStatementPerConnectionSize: 20
+
+
+# 加密所需的密钥
+jasypt:
+  encryptor:
+    password: Bt%XJ^n1j8mz
+    # 默认加密方式PBEWithMD5AndDES,可以更改为PBEWithMD5AndTripleDES
+    algorithm: PBEWithMD5AndDES
 
 
 
